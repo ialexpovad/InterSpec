@@ -121,3 +121,4 @@ target/wxWidgets/3rd_party
 .devcontainer/devcontainer.json
 /devcontainer_prefix/
 *.bak
+/example_spectra/atomtex
