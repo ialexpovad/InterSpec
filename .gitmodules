@@ -4,7 +4,7 @@
 	branch = master
 [submodule "external_libs/SpecUtils"]
 	path = external_libs/SpecUtils
-	url = https://github.com/sandialabs/SpecUtils.git
+	url = https://github.com/ialexpovad/SpecUtils.git
 [submodule "external_libs/QR-Code-generator"]
 	path = external_libs/QR-Code-generator
 	url = https://github.com/nayuki/QR-Code-generator.git
