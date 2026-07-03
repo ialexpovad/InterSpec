@@ -689,3 +689,57 @@ index 23117e87..76237466 100644
  ELSE (ENABLE_LIBWTTEST)
    MESSAGE("** libwttest disabled, not building tests")
  ENDIF (ENABLE_LIBWTTEST)
+diff --git a/src/Wt/WPdfImage.C b/src/Wt/WPdfImage.C
+--- a/src/Wt/WPdfImage.C
++++ b/src/Wt/WPdfImage.C
+@@ -229,7 +229,11 @@
+ 	HPDF_Page_SetLineCap(page_, HPDF_BUTT_END);
+ 	break;
+       case SquareCap:
++#if defined(HPDF_VERSION_ID) && HPDF_VERSION_ID >= 20400
++	HPDF_Page_SetLineCap(page_, HPDF_PROJECTING_SQUARE_END);
++#else
+ 	HPDF_Page_SetLineCap(page_, HPDF_PROJECTING_SCUARE_END); // scuary !
++#endif
+ 	break;
+       case RoundCap:
+ 	HPDF_Page_SetLineCap(page_, HPDF_ROUND_END);
+@@ -255,22 +259,38 @@
+ 	HPDF_Page_SetDash(page_, 0, 0, 0);
+ 	break;
+       case DashLine: {
++#if defined(HPDF_VERSION_ID) && HPDF_VERSION_ID >= 20400
++	const HPDF_REAL dash_ptn[] = { 4, 2 };
++#else
+ 	const HPDF_UINT16 dash_ptn[] = { 4, 2 };
++#endif
+ 	HPDF_Page_SetDash(page_, dash_ptn, 2, 0);
+ 	break;
+       }
+       case DotLine: {
++#if defined(HPDF_VERSION_ID) && HPDF_VERSION_ID >= 20400
++	const HPDF_REAL dash_ptn[] = { 1, 2 };
++#else
+ 	const HPDF_UINT16 dash_ptn[] = { 1, 2 };
++#endif
+ 	HPDF_Page_SetDash(page_, dash_ptn, 2, 0);
+ 	break;
+       }
+       case DashDotLine: {
++#if defined(HPDF_VERSION_ID) && HPDF_VERSION_ID >= 20400
++	const HPDF_REAL dash_ptn[] = { 4, 2, 1, 2 };
++#else
+ 	const HPDF_UINT16 dash_ptn[] = { 4, 2, 1, 2 };
++#endif
+ 	HPDF_Page_SetDash(page_, dash_ptn, 4, 0);
+ 	break;
+       }
+       case DashDotDotLine: {
++#if defined(HPDF_VERSION_ID) && HPDF_VERSION_ID >= 20400
++	const HPDF_REAL dash_ptn[] = { 4, 2, 1, 2, 1, 2 };
++#else
+ 	const HPDF_UINT16 dash_ptn[] = { 4, 2, 1, 2, 1, 2 };
++#endif
+ 	HPDF_Page_SetDash(page_, dash_ptn, 6, 0);
+ 	break;
+       }
