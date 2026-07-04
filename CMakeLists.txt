@@ -1087,6 +1087,19 @@ else(NOT WT_RESOURCES_DIRECTORY)
     endif(BUILD_FOR_WEB_DEPLOYMENT)
 endif(NOT WT_RESOURCES_DIRECTORY)
 
+if(BUILD_AS_LOCAL_SERVER)
+    if(NOT WT_RESOURCES_DIRECTORY)
+        MESSAGE(FATAL_ERROR
+            "BUILD_AS_LOCAL_SERVER requires Wt static resources, but WT_RESOURCES_DIRECTORY was not found")
+    endif(NOT WT_RESOURCES_DIRECTORY)
+
+    if(NOT EXISTS "${WT_RESOURCES_DIRECTORY}/themes/default/wt.css")
+        MESSAGE(FATAL_ERROR
+            "BUILD_AS_LOCAL_SERVER requires '${WT_RESOURCES_DIRECTORY}/themes/default/wt.css'. "
+            "Set WT_RESOURCES_DIRECTORY to the Wt resources directory.")
+    endif()
+endif(BUILD_AS_LOCAL_SERVER)
+
 if(NOT ANDROID)
     SET( SUPPORT_DIRECTORIES InterSpec_resources data example_spectra )
 endif(NOT ANDROID)
@@ -1102,6 +1115,53 @@ foreach(_dir ${SUPPORT_DIRECTORIES})
         )
     endif(WIN32)
 endforeach()
+
+if(BUILD_AS_LOCAL_SERVER)
+    set(INTERSPEC_RUNTIME_ROOT "${PROJECT_BINARY_DIR}/runtime-root" CACHE PATH
+        "Runtime docroot for local InterSpec server builds")
+
+    set(INTERSPEC_RUNTIME_RESOURCE_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${INTERSPEC_RUNTIME_ROOT}"
+    )
+
+    if(WIN32)
+        list(APPEND INTERSPEC_RUNTIME_RESOURCE_COMMANDS
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${PROJECT_BINARY_DIR}/InterSpec_resources"
+                    "${INTERSPEC_RUNTIME_ROOT}/InterSpec_resources"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${PROJECT_SOURCE_DIR}/data"
+                    "${INTERSPEC_RUNTIME_ROOT}/data"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${WT_RESOURCES_DIRECTORY}"
+                    "${INTERSPEC_RUNTIME_ROOT}/resources"
+        )
+    else(WIN32)
+        list(APPEND INTERSPEC_RUNTIME_RESOURCE_COMMANDS
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${INTERSPEC_RUNTIME_ROOT}/InterSpec_resources"
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${INTERSPEC_RUNTIME_ROOT}/data"
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${INTERSPEC_RUNTIME_ROOT}/resources"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+                    "${PROJECT_BINARY_DIR}/InterSpec_resources"
+                    "${INTERSPEC_RUNTIME_ROOT}/InterSpec_resources"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+                    "${PROJECT_SOURCE_DIR}/data"
+                    "${INTERSPEC_RUNTIME_ROOT}/data"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+                    "${WT_RESOURCES_DIRECTORY}"
+                    "${INTERSPEC_RUNTIME_ROOT}/resources"
+        )
+    endif(WIN32)
+
+    add_custom_target(InterSpecRuntimeResources ALL
+        ${INTERSPEC_RUNTIME_RESOURCE_COMMANDS}
+        COMMENT "Staging InterSpec local-server runtime docroot at ${INTERSPEC_RUNTIME_ROOT}"
+    )
+
+    if(TARGET InterSpecExe)
+        add_dependencies(InterSpecExe InterSpecRuntimeResources)
+    endif(TARGET InterSpecExe)
+endif(BUILD_AS_LOCAL_SERVER)
 
 # TODO: I think we can get rid of this next part, but need to modify in the code a little bit probably
 if(INCLUDE_ANALYSIS_TEST_SUITE)
