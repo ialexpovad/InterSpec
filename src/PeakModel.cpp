@@ -2208,6 +2208,9 @@ boost::any PeakModel::data( const WModelIndex &index, int role ) const
 
     case kUseForShieldingSourceFit:
     {
+      if( role != Wt::CheckStateRole )
+        return boost::any();
+
       // Make so we only "use for shielding/source fit" show checkbox for decay gammas and x-rays,
       //  and not for peaks with no source associated, or with florescence x-rays, or for reactions
       
@@ -2237,6 +2240,9 @@ boost::any PeakModel::data( const WModelIndex &index, int role ) const
 
     case kUseForCalibration:
     {
+      if( role != Wt::CheckStateRole )
+        return boost::any();
+
       const bool fixed_mean = !peak->fitFor(PeakDef::CoefficientType::Mean);
       if( fixed_mean )
         return boost::any();
@@ -2245,6 +2251,9 @@ boost::any PeakModel::data( const WModelIndex &index, int role ) const
       
     case kUseForManualRelEff:
     {
+      if( role != Wt::CheckStateRole )
+        return boost::any();
+
       switch( peak->sourceGammaType() )
       {
         case PeakDef::XrayGamma:
